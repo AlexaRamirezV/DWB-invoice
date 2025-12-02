@@ -55,7 +55,7 @@ public class JwtDecoder {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode node = mapper.readTree(payload);
             
-            // Obtenemos el "id" (asegúrate que tu Auth API guarde el claim como "id")
+            // Obtenemos el "id"
             return node.get("id").asInt();
             
         } catch (Exception e) {

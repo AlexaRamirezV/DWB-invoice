@@ -1,16 +1,36 @@
 package com.invoice.api.dto;
-//Punto extra
+
+//Puntos extra:
+
 public class DtoInvoiceIn {
-    private String shipping_address;
+    private String payment_method;
+    private String card_number;
+    private String coupon_code;
 
     public DtoInvoiceIn() {
     }
 
-    public String getShipping_address() {
-        return shipping_address;
+    public String getPayment_method() {
+        return payment_method;
     }
 
-    public void setShipping_address(String shipping_address) {
-        this.shipping_address = shipping_address;
+    public void setPayment_method(String payment_method) {
+        this.payment_method = payment_method;
+    }
+
+    public String getCard_number() {
+        return card_number;
+    }
+
+    public void setCard_number(String card_number) {
+        this.card_number = card_number;
+    }
+
+    public String getCoupon_code() {
+        return coupon_code;
+    }
+
+    public void setCoupon_code(String coupon_code) {
+        this.coupon_code = coupon_code;
     }
 }

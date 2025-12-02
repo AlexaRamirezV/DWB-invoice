@@ -10,8 +10,8 @@ import com.invoice.api.entity.Invoice;
 public interface SvcInvoice {
 
 	public List<DtoInvoiceList> findAll();
-	public Invoice findById(String id);
+	public Invoice findById(Integer id);
 
-	// CAMBIO AQUI: Ahora recibe el token para saber quién compra y punto extra DtoInvoiceIn
+	// Recibe el token para saber quién compra
 	public ApiResponse create(String token, DtoInvoiceIn dto);
 }

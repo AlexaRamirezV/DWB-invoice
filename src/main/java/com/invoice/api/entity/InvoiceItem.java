@@ -16,10 +16,10 @@ public class InvoiceItem {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "invoice_item_id")
-	private String invoice_item_id;
+	private Integer invoice_item_id;
 	
 	@JsonIgnore
-	private String invoice_id;
+	private Integer invoice_id;
 	
 	private String gtin;
 
@@ -39,7 +39,7 @@ public class InvoiceItem {
 		
 	}
 
-	public InvoiceItem(String invoice_item_id, String invoice_id, String gtin, Integer quantity, Double unit_price,
+	public InvoiceItem(Integer invoice_item_id, Integer invoice_id, String gtin, Integer quantity, Double unit_price,
 			Double subtotal, Double taxes, Double total) {
 		super();
 		this.invoice_item_id = invoice_item_id;
@@ -52,19 +52,19 @@ public class InvoiceItem {
 		this.total = total;
 	}
 
-	public String getInvoice_item_id() {
+	public Integer getInvoice_item_id() {
 		return invoice_item_id;
 	}
 
-	public void setInvoice_item_id(String invoice_item_id) {
+	public void setInvoice_item_id(Integer invoice_item_id) {
 		this.invoice_item_id = invoice_item_id;
 	}
 
-	public String getInvoice_id() {
+	public Integer getInvoice_id() {
 		return invoice_id;
 	}
 
-	public void setInvoice_id(String invoice_id) {
+	public void setInvoice_id(Integer invoice_id) {
 		this.invoice_id = invoice_id;
 	}
 

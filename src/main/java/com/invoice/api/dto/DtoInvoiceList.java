@@ -2,7 +2,7 @@ package com.invoice.api.dto;
 
 public class DtoInvoiceList {
 	
-	private String id;
+	private Integer id;
 	
 	private Integer user_id;
 		
@@ -15,12 +15,21 @@ public class DtoInvoiceList {
 	private Double total;
 
 	private String shipping_address;
+
+	private String payment_method;
+
+	private String card_number;
+
+	private String coupon_code;
+
+	private Double discount;
 	
 	public DtoInvoiceList() {
 		
 	}
 
-	public DtoInvoiceList(String id, Integer user_id, String created_at, Double subtotal, Double taxes, Double total, String shipping_address) {
+	public DtoInvoiceList(Integer id, Integer user_id, String created_at, Double subtotal, Double taxes, Double total, String shipping_address, 
+			String payment_method, String card_number, String coupon_code, Double discount) {
 		super();
 		this.id = id;
 		this.user_id = user_id;
@@ -29,13 +38,17 @@ public class DtoInvoiceList {
 		this.taxes = taxes;
 		this.total = total;
 		this.shipping_address = shipping_address;
+		this.payment_method = payment_method;
+		this.card_number = card_number;
+		this.coupon_code = coupon_code;
+		this.discount = discount;
 	}
 
-	public String getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
@@ -79,7 +92,7 @@ public class DtoInvoiceList {
 		this.total = total;
 	}
 
-	// Punto extra
+	// Puntos extra
 	public String getShipping_address() {
 		return shipping_address;
 	}
@@ -87,5 +100,39 @@ public class DtoInvoiceList {
 	public void setShipping_address(String shipping_address) {
 		this.shipping_address = shipping_address;
 	}
+
+	public String getPayment_method() {
+		return payment_method;
+	}
+
+	public void setPayment_method(String payment_method) {
+		this.payment_method = payment_method;
+	}
+
+	public String getCard_number() {
+		return card_number;
+	}
+
+	public void setCard_number(String card_number) {
+		this.card_number = card_number;
+	}
+
+	public String getCoupon_code() {
+		return coupon_code;
+	}
+
+	public void setCoupon_code(String coupon_code) {
+		this.coupon_code = coupon_code;
+	}
+
+	public Double getDiscount() {
+		return discount;
+	}
+
+	public void setDiscount(Double discount) {
+		this.discount = discount;
+	}
+
+	
 	
 }

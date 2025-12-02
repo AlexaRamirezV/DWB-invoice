@@ -6,6 +6,8 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
@@ -16,7 +18,9 @@ import jakarta.persistence.Table;
 public class Invoice {
 	
 	@Id
-	private String invoice_id;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "invoice_id")
+	private Integer invoice_id;
 
 	private Integer user_id;
 	
@@ -30,9 +34,19 @@ public class Invoice {
 
 	private Integer status;
 
-	// Punto extra:
+	// Puntos extra:
 	@Column(name = "shipping_address")
     private String shipping_address;
+
+	@Column(name = "payment_method")
+	private String payment_method; // Tarjeta, Efectivo, Paypal...
+	private String card_number;
+
+	@Column(name = "coupon_code")
+	private String coupon_code;
+
+	@Column(name = "discount")
+	private Double discount; // El dinero que se descontó
 
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "invoice_id", referencedColumnName = "invoice_id")
@@ -42,7 +56,7 @@ public class Invoice {
 		
 	}
 
-	public Invoice(String invoice_id, Integer user_id, String created_at, Double subtotal, Double taxes, Double total,
+	public Invoice(Integer invoice_id, Integer user_id, String created_at, Double subtotal, Double taxes, Double total,
 			List<InvoiceItem> items) {
 		super();
 		this.invoice_id = invoice_id;
@@ -54,11 +68,11 @@ public class Invoice {
 		this.items = items;
 	}
 
-	public String getInvoice_id() {
+	public Integer getInvoice_id() {
 		return invoice_id;
 	}
 
-	public void setInvoice_id(String invoice_id) {
+	public void setInvoice_id(Integer invoice_id) {
 		this.invoice_id = invoice_id;
 	}
 
@@ -124,6 +138,38 @@ public class Invoice {
 
 	public void setShipping_address(String shipping_address) {
 		this.shipping_address = shipping_address;
+	}
+
+	public String getPayment_method() {
+		return payment_method;
+	}
+
+	public void setPayment_method(String payment_method) {
+		this.payment_method = payment_method;
+	}
+
+	public String getCoupon_code() {
+		return coupon_code;
+	}
+
+	public void setCoupon_code(String coupon_code) {
+		this.coupon_code = coupon_code;
+	}
+
+	public Double getDiscount() {
+		return discount;
+	}
+
+	public void setDiscount(Double discount) {
+		this.discount = discount;
+	}
+
+	public String getCard_number() {
+		return card_number;
+	}
+
+	public void setCard_number(String card_number) {
+		this.card_number = card_number;
 	}
 	
 }

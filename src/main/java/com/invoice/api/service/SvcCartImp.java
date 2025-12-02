@@ -77,7 +77,7 @@ public class SvcCartImp implements SvcCart {
             throw new ApiException(HttpStatus.BAD_REQUEST, "La cantidad debe ser mayor a 0");
         }
 
-        // 3. Validar producto con la API PRODUCT (Backend-proyecto)
+        // 3. Validar producto con la API PRODUCT
         DtoProduct product;
         try {
             ResponseEntity<DtoProduct> response = productClient.getProduct(cartItem.getGtin());

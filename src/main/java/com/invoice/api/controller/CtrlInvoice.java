@@ -37,13 +37,14 @@ public class CtrlInvoice {
 
 	@GetMapping("/{id}")
 	@Operation(summary = "Consulta de factura", description = "Consulta el detalle de una factura")
-	public ResponseEntity<Invoice> findById(@PathVariable("id") String id) {		
+	public ResponseEntity<Invoice> findById(@PathVariable("id") Integer id) {		
 		return ResponseEntity.ok(svc.findById(id));
 	}
 	
 	@PostMapping
-	@Operation(summary = "Creación de factura", description = "Cliente crea una factura")
-	public ResponseEntity<ApiResponse> create(HttpServletRequest request, @RequestBody DtoInvoiceIn dto){ // Recibimos el request
+	@Operation(summary = "Creación de factura", description = "Cliente crea una factura. Puede incluir método de pago y cupón (la dirección de envío se rescata de la API customer)")
+	// 'required = false' para que no falle si no mandan nada
+	public ResponseEntity<ApiResponse> create(HttpServletRequest request, @RequestBody(required = false) DtoInvoiceIn dto){ // Recibimos el request
         // Extraemos el token quitando la palabra "Bearer "
         String token = request.getHeader("Authorization").substring(7);
         

@@ -2,16 +2,20 @@ package com.invoice.api.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.invoice.api.dto.ApiResponse;
+import com.invoice.api.dto.DtoCustomer;
 import com.invoice.api.dto.DtoInvoiceIn;
 import com.invoice.api.dto.DtoInvoiceList;
 import com.invoice.api.dto.DtoProduct;
@@ -20,6 +24,7 @@ import com.invoice.api.entity.Invoice;
 import com.invoice.api.entity.InvoiceItem;
 import com.invoice.api.repository.RepoCart;
 import com.invoice.api.repository.RepoInvoice;
+import com.invoice.api.service.customer.CustomerClient;
 import com.invoice.api.service.product.ProductClient;
 import com.invoice.commons.mapper.MapperInvoice;
 import com.invoice.commons.util.JwtDecoder;
@@ -46,6 +51,10 @@ public class SvcInvoiceImp implements SvcInvoice {
 	@Autowired
 	MapperInvoice mapper;
 
+	@Autowired
+    private CustomerClient customerClient;
+
+
 	@Override
 	public List<DtoInvoiceList> findAll() {
 		try {
@@ -61,7 +70,7 @@ public class SvcInvoiceImp implements SvcInvoice {
 	}
 
 	@Override
-	public Invoice findById(String id) {
+	public Invoice findById(Integer id) {
 		try {
 			Invoice invoice = repoInvoice.findById(id).get();
 			if (!jwtDecoder.isAdmin()) {
@@ -80,42 +89,107 @@ public class SvcInvoiceImp implements SvcInvoice {
 
 	@Override
 	@Transactional
-	public ApiResponse create(String token, DtoInvoiceIn dto) { // Asegúrate de pasar el token desde el controlador
+	public ApiResponse create(String token, DtoInvoiceIn dto) { // Pasamos el token desde el controlador
+		
+		// Obtener el ID del usuario desde el token
 		Integer userId = jwtDecoder.extractUserId(token);
 
-		// --- VALIDACIÓN DE DIRECCIÓN (Punto Extra) ---
-		if (dto.getShipping_address() == null || dto.getShipping_address().isEmpty()) {
-			throw new ApiException(HttpStatus.BAD_REQUEST, "La dirección de envío es obligatoria");
-		}
+		// Punto extra
+		//  Ir a Customer Service por la dirección
+		String shippingAddress = "";
+		try {
+            // Buscamos al cliente en la otra API con el mismo ID del usuario
+            ResponseEntity<DtoCustomer> response = customerClient.getCustomer(userId);
+            shippingAddress = response.getBody().getAddress();
+        } catch (Exception e) {
+			System.err.println("ERROR AL LLAMAR A CUSTOMER: " + e.getMessage());
+			e.printStackTrace();
+            throw new ApiException(HttpStatus.BAD_REQUEST, "No se encontró información del cliente para este usuario. Asegúrese de tener un perfil creado en el módulo de Clientes");
+        }
 
-		// 1. Obtener items del carrito
+		// Obtener items del carrito
 		List<Cart> cartItems = repoCart.findByUserId(userId);
 		if (cartItems.isEmpty()) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "El carrito está vacío");
 		}
 
-		// 2. Preparar la factura
+		// Preparar la factura
 		Invoice invoice = new Invoice();
-
-		// Generamos un ID único manual porque es VARCHAR en la BD
-		String uniqueId = java.util.UUID.randomUUID().toString();
-		invoice.setInvoice_id(uniqueId);
 
 		invoice.setUser_id(userId);
 		invoice.setCreated_at(LocalDateTime.now().toString());
 		invoice.setStatus(1); // Activa
 
-		// PUNTO EXTRA
-		invoice.setShipping_address(dto.getShipping_address());
+		// Puntos extra
+
+		// Dirección de envío
+		invoice.setShipping_address(shippingAddress);
+
+		// Método de Pago
+		List<String> validMethods = Arrays.asList("EFECTIVO", "TARJETA", "PAYPAL", "TRANSFERENCIA");
+		String method = (dto != null && dto.getPayment_method() != null) ? dto.getPayment_method().toUpperCase()
+				: "EFECTIVO";
+
+		if (!validMethods.contains(method)) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Método de pago inválido. Disponibles: " + validMethods);
+		}
+
+		invoice.setPayment_method(method);
+
+		// Lógica específica para TARJETA
+		if (method.equals("TARJETA")) {
+			if (dto.getCard_number() == null || dto.getCard_number().length() < 16) {
+				throw new ApiException(HttpStatus.BAD_REQUEST, "Para pago con tarjeta se requieren los 16 dígitos.");
+			}
+
+			// SIMULACIÓN DE SEGURIDAD: Solo guardamos los últimos 4 dígitos
+			String rawCard = dto.getCard_number();
+			String maskedCard = "************" + rawCard.substring(rawCard.length() - 4);
+
+			invoice.setCard_number(maskedCard);
+		} else {
+			invoice.setCard_number(null); // No aplica para efectivo/paypal
+		}
+
+		// Cupones
+		// Definimos un descuento inicial de 0
+		Double discountPercentage = 0.0;
+		String coupon = (dto != null && dto.getCoupon_code() != null) ? dto.getCoupon_code().toUpperCase() : null;
+
+		// Definimos nuestros  cupones válidos en memoria
+        Map<String, Double> validCoupons = new HashMap<>();
+        validCoupons.put("DESCUENTO10", 0.10); // 10%
+        validCoupons.put("DESCUENTO20", 0.20); // 20% <--- AHORA SÍ VA A FUNCIONAR ESTE
+        validCoupons.put("DESCUENTO50", 0.50); // 50%
+        validCoupons.put("BUENFIN20",   0.20); // 20%
+
+        // Verificamos si el cupón que mandó el usuario existe en nuestro mapa
+        if (coupon != null && validCoupons.containsKey(coupon)) {
+            discountPercentage = validCoupons.get(coupon);
+            invoice.setCoupon_code(coupon);
+        } else if (coupon != null) {
+            // Opcional: Si mandó un cupón pero no es válido, podemos dejarlo en null 
+           
+        }
+
+
 
 		List<InvoiceItem> items = new ArrayList<>();
 		Double subtotal = 0.0;
 		Double totalTaxes = 0.0;
 
-		// 3. Procesar cada item
+		// Procesar cada item
 		for (Cart c : cartItems) {
-			// Validar Stock actual (pudo haber cambiado desde que lo agregó al carrito)
-			DtoProduct product = productClient.getProduct(c.getGtin()).getBody();
+
+			// Consultar producto en la API product
+			DtoProduct product;
+			try {
+				product = productClient.getProduct(c.getGtin()).getBody();
+			} catch (Exception e) {
+				throw new ApiException(HttpStatus.BAD_REQUEST, "Error al obtener producto: " + c.getGtin());
+			}
+
+			// Validar Stock actual (pudo haber cambiado desde que se agrego al carrito)
 			if (product.getStock() < c.getQuantity()) {
 				throw new ApiException(HttpStatus.BAD_REQUEST, "Stock insuficiente para el producto: " + c.getGtin());
 			}
@@ -131,7 +205,6 @@ public class SvcInvoiceImp implements SvcInvoice {
 
 			// Crear InvoiceItem
 			InvoiceItem item = new InvoiceItem();
-			item.setInvoice_id(uniqueId); // Asignar el ID de la factura al item
 			item.setGtin(c.getGtin());
 			item.setQuantity(c.getQuantity());
 			item.setUnit_price(unitPrice);
@@ -146,18 +219,27 @@ public class SvcInvoiceImp implements SvcInvoice {
 			productClient.updateProductStock(c.getGtin(), c.getQuantity());
 		}
 
-		// 4. Totales finales de la factura
-		invoice.setSubtotal(subtotal);
-		invoice.setTaxes(totalTaxes);
-		invoice.setTotal(subtotal + totalTaxes);
-		invoice.setItems(items); // JPA Cascade guardará los items y asignará el ID de factura automáticamente
+		// --- APLICAR DESCUENTO AL FINAL ---
+		Double discountAmount = subtotal * discountPercentage; // Descuento sobre subtotal
+		Double subtotalWithDiscount = subtotal - discountAmount;
 
-		// 5. Guardar Factura
+		// Totales finales de la factura
+		invoice.setSubtotal(subtotal);
+		invoice.setDiscount(discountAmount); // Guardamos cuánto se descontó
+		invoice.setTaxes(totalTaxes);
+
+		// Total = (Subtotal - Descuento) + Impuestos
+		invoice.setTotal(subtotalWithDiscount + totalTaxes);
+
+		invoice.setItems(items);
+
+		// Guardar Factura
 		repoInvoice.save(invoice);
 
-		// 6. Vaciar Carrito
+		// Vaciar Carrito
 		repoCart.clearCart(userId);
 
 		return new ApiResponse("Compra finalizada exitosamente");
 	}
+
 }
