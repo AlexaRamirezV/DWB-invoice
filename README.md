@@ -42,7 +42,7 @@ CREATE DATABASE db_invoice; -- Para artículos del carrito y facturas
 ---
 ### 🔗 Mapa de Arquitectura
 0. [Config data](https://github.com/AlexaRamirezV/config-data.git)
-1.  [Config Server] https://github.com/AlexaRamirezV/config-service.git
+1.  [Config Server](https://github.com/AlexaRamirezV/config-service.git)
 2.  [Registry Service (Eureka)](https://github.com/AlexaRamirezV/registry-service.git)
 3.  [Gateway Service](https://github.com/AlexaRamirezV/gateway-service.git)
 4.  [Admin Service](https://github.com/AlexaRamirezV/admin-service.git)
