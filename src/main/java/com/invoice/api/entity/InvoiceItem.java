@@ -9,6 +9,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/**
+ * Entidad JPA que representa el detalle (renglón) de una factura.
+ * Almacena la "foto" de la transacción de un producto específico en el momento
+ * de la compra, guardando el precio unitario, impuestos y subtotales congelados para el
+ * historial.
+ */
 @Entity
 @Table(name = "invoice_item")
 public class InvoiceItem {
@@ -35,10 +41,24 @@ public class InvoiceItem {
 
 	private Integer status;
 	
+	/**
+	 * Constructor
+	 */
 	public InvoiceItem() {
 		
 	}
 
+	/**
+	 * Constructor
+	 * @param invoice_item_id
+	 * @param invoice_id
+	 * @param gtin
+	 * @param quantity
+	 * @param unit_price
+	 * @param subtotal
+	 * @param taxes
+	 * @param total
+	 */
 	public InvoiceItem(Integer invoice_item_id, Integer invoice_id, String gtin, Integer quantity, Double unit_price,
 			Double subtotal, Double taxes, Double total) {
 		super();
@@ -51,6 +71,8 @@ public class InvoiceItem {
 		this.taxes = taxes;
 		this.total = total;
 	}
+
+	// Getters y setters
 
 	public Integer getInvoice_item_id() {
 		return invoice_item_id;

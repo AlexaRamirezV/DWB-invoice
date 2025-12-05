@@ -9,6 +9,12 @@ import org.springframework.stereotype.Repository;
 
 import com.invoice.api.entity.Invoice;
 
+/**
+ * Repositorio JPA para la gestión de la persistencia de las Facturas.
+ * 
+ * Permite guardar nuevas facturas (con sus ítems en cascada) y consultar
+ * el historial de compras filtrado por el ID del usuario.
+ */
 @Repository
 public interface RepoInvoice extends JpaRepository<Invoice, Integer> {
 

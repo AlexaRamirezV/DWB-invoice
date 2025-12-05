@@ -13,6 +13,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+/**
+ * Entidad que representa la tabla 'invoice' en la base de datos.
+ * Almacena la información general de una factura generada tras una compra
+ * exitosa.
+ * 
+ */
 @Entity
 @Table(name = "invoice")
 public class Invoice {
@@ -52,10 +58,23 @@ public class Invoice {
     @JoinColumn(name = "invoice_id", referencedColumnName = "invoice_id")
 	private List<InvoiceItem> items;
 	
+	/**
+	 * Constructor
+	 */
 	public Invoice() {
 		
 	}
 
+	/**
+	 * Constructor
+	 * @param invoice_id
+	 * @param user_id
+	 * @param created_at
+	 * @param subtotal
+	 * @param taxes
+	 * @param total
+	 * @param items
+	 */
 	public Invoice(Integer invoice_id, Integer user_id, String created_at, Double subtotal, Double taxes, Double total,
 			List<InvoiceItem> items) {
 		super();
@@ -67,6 +86,8 @@ public class Invoice {
 		this.total = total;
 		this.items = items;
 	}
+
+	// Getters y setters
 
 	public Integer getInvoice_id() {
 		return invoice_id;

@@ -1,5 +1,10 @@
 package com.invoice.api.dto;
 
+/**
+ * DTO de salida para el listado de facturas.
+ * Representa una vista resumida de una factura generada, incluyendo los
+ * totales, impuestos, fecha de creación, dirección de envío y desglose de descuentos.
+ */
 public class DtoInvoiceList {
 	
 	private Integer id;
@@ -24,10 +29,27 @@ public class DtoInvoiceList {
 
 	private Double discount;
 	
+	/**
+	 * Constructor
+	 */
 	public DtoInvoiceList() {
 		
 	}
 
+	/**
+	 * Constructor
+	 * @param id
+	 * @param user_id
+	 * @param created_at
+	 * @param subtotal
+	 * @param taxes
+	 * @param total
+	 * @param shipping_address
+	 * @param payment_method
+	 * @param card_number
+	 * @param coupon_code
+	 * @param discount
+	 */
 	public DtoInvoiceList(Integer id, Integer user_id, String created_at, Double subtotal, Double taxes, Double total, String shipping_address, 
 			String payment_method, String card_number, String coupon_code, Double discount) {
 		super();
@@ -43,6 +65,8 @@ public class DtoInvoiceList {
 		this.coupon_code = coupon_code;
 		this.discount = discount;
 	}
+
+	// Getters y setters
 
 	public Integer getId() {
 		return id;
@@ -92,15 +116,26 @@ public class DtoInvoiceList {
 		this.total = total;
 	}
 
-	// Puntos extra
+	/**
+	 * Método para obtener la dirección de envío
+	 * @return
+	 */
 	public String getShipping_address() {
 		return shipping_address;
 	}
 
+	/**
+	 * Método para asignar la dirección de envío
+	 * @param shipping_address
+	 */
 	public void setShipping_address(String shipping_address) {
 		this.shipping_address = shipping_address;
 	}
 
+	/**
+	 * Método para obtener el método de pago
+	 * @return
+	 */
 	public String getPayment_method() {
 		return payment_method;
 	}

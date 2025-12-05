@@ -18,6 +18,13 @@ import com.invoice.commons.dto.ApiResponse;
 import com.invoice.commons.util.JwtDecoder;
 import com.invoice.exception.ApiException;
 
+/**
+ * Implementación de la lógica de negocio del Carrito.
+ * 
+ * Esta clase interactúa con el repositorio local (RepoCart) y se comunica
+ * con el microservicio de Productos mediante (ProductClient) para obtener
+ * información actualizada y validar inventarios en tiempo real.
+ */
 @Service
 public class SvcCartImp implements SvcCart {
 
@@ -30,6 +37,11 @@ public class SvcCartImp implements SvcCart {
     @Autowired
     JwtDecoder jwtDecoder;
 
+    /**
+     * Recupera los items del carrito y consulta product-service para llenar los
+     * detalles (Nombre, Descripción, Precio actual) que no se guardan en la tabla
+     * local.
+     */
     @Override
     public List<DtoCartItem> getCart(String token) {
         Integer userId = jwtDecoder.extractUserId(token); // Asumiendo que adaptaste JwtDecoder para recibir el token
@@ -44,7 +56,7 @@ public class SvcCartImp implements SvcCart {
             dto.setGtin(cart.getGtin());
             dto.setQuantity(cart.getQuantity());
 
-            // Llamada a Product-Service para obtener nombre y precio
+            // Llamada a product-service para obtener nombre y precio
             try {
                 ResponseEntity<DtoProduct> response = productClient.getProduct(cart.getGtin());
                 DtoProduct productData = response.getBody();
@@ -67,6 +79,12 @@ public class SvcCartImp implements SvcCart {
         return dtoCartList;
     }
 
+    /**
+     * Agrega un ítem al carrito.
+     * Valida existencia y stock disponible en product-service antes de guardar.
+     * Si el producto ya está en el carrito, suma la cantidad y re-valida el stock
+     * total.
+     */
     @Override
     public ApiResponse addToCart(String token, Cart cartItem) {
         // 1. Obtener usuario del token
@@ -116,6 +134,14 @@ public class SvcCartImp implements SvcCart {
         return new ApiResponse("Producto agregado al carrito");
     }
 
+    /**
+     * Elimina un artículo específico del carrito de compras del usuario.
+     * 
+     * @param token  Token JWT para identificar al usuario dueño del carrito.
+     * @param cartId ID único del registro del ítem en el carrito (cart_item_id).
+     * @return ApiResponse con el mensaje de éxito o error si no se encuentra el
+     *         ítem.
+     */
     @Override
     public ApiResponse removeFromCart(String token, Integer cartId) {
         Integer userId = jwtDecoder.extractUserId(token);
@@ -125,6 +151,15 @@ public class SvcCartImp implements SvcCart {
             throw new ApiException(HttpStatus.NOT_FOUND, "Item no encontrado en tu carrito");
     }
 
+    /**
+     * Vacía completamente el carrito de compras del usuario.
+     * Elimina todos los registros asociados al ID del usuario extraído del token.
+     * Se utiliza típicamente al finalizar una compra exitosa o cuando el usuario
+     * decide limpiar su carrito.
+     * 
+     * @param token Token JWT para identificar al usuario.
+     * @return ApiResponse confirmando la limpieza del carrito.
+     */
     @Override
     public ApiResponse clearCart(String token) {
         Integer userId = jwtDecoder.extractUserId(token);

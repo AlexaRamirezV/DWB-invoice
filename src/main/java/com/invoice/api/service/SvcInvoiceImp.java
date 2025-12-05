@@ -14,7 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.invoice.api.dto.ApiResponse;
+import com.invoice.commons.dto.ApiResponse;
 import com.invoice.api.dto.DtoCustomer;
 import com.invoice.api.dto.DtoInvoiceIn;
 import com.invoice.api.dto.DtoInvoiceList;
@@ -33,6 +33,23 @@ import com.invoice.exception.DBAccessException;
 
 import jakarta.transaction.Transactional;
 
+/**
+ * Proceso transaccional de compra.
+ * 1. Obtiene usuario del Token.
+ * 2. Consulta Customer-Service para obtener la dirección de envío real.
+ * 3. Valida que el carrito no esté vacío.
+ * 4. Itera sobre los ítems:
+ * - Valida stock con Product-Service.
+ * - Calcula subtotales e impuestos (16%).
+ * - Resta el stock en Product-Service.
+ * 5. Aplica lógica de cupones y guarda método de pago.
+ * 6. Guarda la factura y sus detalles en cascada.
+ * 7. Vacía el carrito.
+ * 
+ * @param token Token JWT del usuario.
+ * @param dto   Datos de entrada opcionales (pago, cupón).
+ * @return Respuesta exitosa si todo sale bien.
+ */
 @Service
 public class SvcInvoiceImp implements SvcInvoice {
 
@@ -55,6 +72,12 @@ public class SvcInvoiceImp implements SvcInvoice {
     private CustomerClient customerClient;
 
 
+	/**
+	 * Obtiene el historial de facturas.
+	 * Si es ADMIN, ve todas. Si es CUSTOMER, ve solo las suyas.
+	 * 
+	 * @return Lista de facturas (DtoInvoiceList).
+	 */
 	@Override
 	public List<DtoInvoiceList> findAll() {
 		try {
@@ -69,6 +92,12 @@ public class SvcInvoiceImp implements SvcInvoice {
 		}
 	}
 
+	/**
+	 * Obtiene el detalle completo de una factura específica.
+	 * 
+	 * @param id ID de la factura.
+	 * @return Entidad Invoice completa.
+	 */
 	@Override
 	public Invoice findById(Integer id) {
 		try {
@@ -87,6 +116,16 @@ public class SvcInvoiceImp implements SvcInvoice {
 		}
 	}
 
+	/**
+	 * Genera una nueva factura a partir de los artículos en el carrito de compras.
+	 * Requiere Token para identificar al usuario y DTO opcional para pago y
+	 * cupones.
+	 * 
+	 * @param request Objeto HttpServletRequest para extraer el Header
+	 *                Authorization.
+	 * @param dto     (Opcional) Datos de método de pago y cupón de descuento.
+	 * @return ApiResponse con el resultado de la transacción.
+	 */
 	@Override
 	@Transactional
 	public ApiResponse create(String token, DtoInvoiceIn dto) { // Pasamos el token desde el controlador

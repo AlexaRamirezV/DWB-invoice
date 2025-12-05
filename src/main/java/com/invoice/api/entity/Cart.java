@@ -3,6 +3,11 @@ package com.invoice.api.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+/**
+ * Entidad que representa la tabla 'cart_item'.
+ * Funciona como el carrito de compras persistente del usuario.
+ * Cada registro representa un producto específico y su cantidad deseada.
+ */
 @Entity
 @Table(name = "cart_item")
 public class Cart {

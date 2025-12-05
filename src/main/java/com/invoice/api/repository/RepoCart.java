@@ -12,6 +12,11 @@ import org.springframework.stereotype.Repository;
 import com.invoice.api.entity.Cart;
 import jakarta.transaction.Transactional;
 
+/**
+ * Repositorio JPA para la gestión de la persistencia del Carrito de Compras.
+ * Provee métodos para buscar ítems activos por usuario, verificar si un producto
+ * ya existe en el carrito y limpiar el carrito tras una compra.
+ */
 @Repository
 public interface RepoCart extends JpaRepository<Cart, Integer> {
 

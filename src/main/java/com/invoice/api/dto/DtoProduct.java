@@ -1,5 +1,10 @@
 package com.invoice.api.dto;
 
+/**
+ * DTO que representa la información de un producto obtenida desde el product-service.
+ * Se utiliza para validar la existencia del producto, consultar el stock
+ * disponible en tiempo real y obtener el precio unitario vigente para los cálculos de la factura.
+ */
 public class DtoProduct {
     private String gtin;
     private Integer stock;
@@ -7,7 +12,9 @@ public class DtoProduct {
     private String product;
     private String description;
 
-    // Constructor vacío necesario
+    /**
+     * Constructor
+     */
     public DtoProduct() {
     }
 
